@@ -57,6 +57,21 @@ typedef NS_ENUM(NSUInteger, DXPopoverMaskType) {
 @property (nonatomic, assign) BOOL animationSpring;
 
 /**
+ *  Add an animation that has the popover bounce up and down from a point, default is NO
+ */
+@property (nonatomic, assign) BOOL animationBounce;
+
+/**
+ *  The distance that the animation bounces, default is 12
+ */
+@property (nonatomic, assign) CGFloat bounceDistance;
+
+/**
+ *  The animation time for the bounce, default is 0.7
+ */
+@property (nonatomic, assign) CGFloat bounceAnimationTime;
+
+/**
  *  The background of the popover, default is DXPopoverMaskTypeBlack;
  */
 @property (nonatomic, assign) DXPopoverMaskType maskType;

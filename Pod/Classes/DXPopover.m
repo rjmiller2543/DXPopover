@@ -18,6 +18,7 @@
 @property (nonatomic, weak) UIView *contentView;
 @property (nonatomic, assign) CGRect contentViewFrame;
 @property (nonatomic, strong) UIColor *contentColor;
+@property (nonatomic) BOOL animateUp;
 
 @end
 
@@ -64,6 +65,9 @@
     self.animationIn = 0.4;
     self.animationOut = 0.3;
     self.animationSpring = YES;
+    self.animationBounce = NO;
+    self.bounceDistance = 12.0f;
+    self.bounceAnimationTime = 0.7f;
     self.sideEdge = 10.0;
     self.maskType = DXPopoverMaskTypeBlack;
     self.betweenAtViewAndArrowHeight = 4.0;
@@ -316,6 +320,50 @@
                 }
             }];
     }
+    
+    if (self.animationBounce) {
+        [self animateWithBounce];
+    }
+}
+
+- (void)animateWithBounce {
+    
+    if (self.popoverPosition == DXPopoverPositionUp) {
+        _animateUp = true;
+    }
+    else
+        _animateUp = false;
+    
+    NSTimer *timer = [NSTimer timerWithTimeInterval:self.bounceAnimationTime target:self selector:@selector(doBounceAnimation:) userInfo:NULL repeats:YES];
+    [[NSRunLoop mainRunLoop] addTimer:timer forMode:NSDefaultRunLoopMode];
+    
+}
+
+- (void)doBounceAnimation:(NSTimer *)timer {
+    
+    if (_animateUp) {
+        [UIView animateWithDuration:self.bounceAnimationTime animations:^{
+            CGRect theFrame = self.frame;
+            
+            theFrame.origin.y -= self.bounceDistance;
+            
+            [self setFrame:theFrame];
+            
+            _animateUp = false;
+        }];
+    }
+    else {
+        [UIView animateWithDuration:self.bounceAnimationTime animations:^{
+            CGRect theFrame = self.frame;
+            
+            theFrame.origin.y += self.bounceDistance;
+            
+            [self setFrame:theFrame];
+            
+            _animateUp = true;
+        }];
+    }
+    
 }
 
 - (void)showAtView:(UIView *)atView withText:(NSAttributedString *)abs {

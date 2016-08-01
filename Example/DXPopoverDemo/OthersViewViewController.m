@@ -52,6 +52,7 @@
 - (IBAction)topRight:(id)sender {
     DXPopover *popover = [DXPopover popover];
     popover.backgroundColor = [UIColor purpleColor];
+    popover.animationBounce = YES;
     [popover showAtView:sender
                withText:[[NSAttributedString alloc] initWithString:@"jkjljdalkjdkljalfjklaj"]];
 }
@@ -60,6 +61,7 @@
 - (IBAction)bottomLeft:(id)sender {
     UISegmentedControl *switcher = [[UISegmentedControl alloc] initWithItems:@[ @"You", @"Me" ]];
     DXPopover *popover = [DXPopover popover];
+    popover.animationBounce = YES;
     [popover showAtView:sender withContentView:switcher inView:self.view];
 }
 
@@ -71,6 +73,7 @@
     
     
     DXPopover *popover = [DXPopover popover];
+    popover.animationBounce = YES;
     [popover showAtView:sender withContentView:appview];
     
 }
@@ -84,6 +87,7 @@
     textLabel.backgroundColor = [UIColor whiteColor];
 
     DXPopover *popover = [DXPopover popover];
+    popover.animationBounce = YES;
     [popover showAtView:sender
          popoverPostion:DXPopoverPositionDown
         withContentView:textLabel
@@ -95,6 +99,7 @@
     UIView *switcher = [[UIView alloc] initWithFrame:CGRectMake(0, 0, 300, 400)];
     switcher.backgroundColor = [UIColor redColor];
     DXPopover *popover = [DXPopover popover];
+    popover.animationBounce = YES;
     [popover showAtView:sender withContentView:self.innerView inView:self.view];
     popover.didDismissHandler = ^{
         self.innerView.layer.cornerRadius = 0.0;
