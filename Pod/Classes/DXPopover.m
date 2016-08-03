@@ -333,7 +333,7 @@
         [_button setTitle:@"Got it" forState:UIControlStateNormal];
         _button.titleLabel.font = _textFont;
         [_button setTitleColor:_textColor forState:UIControlStateNormal];
-        [_button setBackgroundColor:[UIColor blackColor]];
+        [_button setBackgroundColor:_buttonColor];
         
         [_button addTarget:self action:@selector(dismiss) forControlEvents:UIControlEventTouchUpInside];
         
