@@ -72,6 +72,30 @@ typedef NS_ENUM(NSUInteger, DXPopoverMaskType) {
 @property (nonatomic, assign) CGFloat bounceAnimationTime;
 
 /**
+ *
+ *  Adding a button to dismiss at the bottom of the Content View
+ */
+@property (nonatomic, assign) BOOL useDoneButton;
+
+/**
+ *
+ *  Color For Done Button
+ */
+@property (nonatomic, assign) UIColor *buttonColor;
+
+/**
+ *
+ *  Font for Done Button
+ */
+@property (nonatomic, assign) UIFont *textFont;
+
+/**
+ *
+ *  Text Color for Done Button
+ */
+@property (nonatomic, assign) UIColor *textColor;
+
+/**
  *  The background of the popover, default is DXPopoverMaskTypeBlack;
  */
 @property (nonatomic, assign) DXPopoverMaskType maskType;

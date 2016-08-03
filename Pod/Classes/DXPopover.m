@@ -19,6 +19,7 @@
 @property (nonatomic, assign) CGRect contentViewFrame;
 @property (nonatomic, strong) UIColor *contentColor;
 @property (nonatomic) BOOL animateUp;
+@property (nonatomic, retain) UIButton *button;
 
 @end
 
@@ -68,6 +69,10 @@
     self.animationBounce = NO;
     self.bounceDistance = 12.0f;
     self.bounceAnimationTime = 0.7f;
+    self.useDoneButton = false;
+    self.buttonColor = [UIColor darkGrayColor];
+    self.textFont = [UIFont systemFontOfSize:14.0f];
+    self.textColor = [UIColor whiteColor];
     self.sideEdge = 10.0;
     self.maskType = DXPopoverMaskTypeBlack;
     self.betweenAtViewAndArrowHeight = 4.0;
@@ -321,6 +326,21 @@
             }];
     }
     
+    if (_useDoneButton) {
+    
+        CGFloat buttonSize = _containerView.frame.size.width * 0.15;
+        _button = [[UIButton alloc] initWithFrame:CGRectMake(_containerView.frame.origin.x, _containerView.frame.size.height - buttonSize, _containerView.frame.size.width, buttonSize)];
+        [_button setTitle:@"Got it" forState:UIControlStateNormal];
+        _button.titleLabel.font = _textFont;
+        [_button setTitleColor:_textColor forState:UIControlStateNormal];
+        [_button setBackgroundColor:[UIColor blackColor]];
+        
+        [_button addTarget:self action:@selector(dismiss) forControlEvents:UIControlEventTouchUpInside];
+        
+        [_containerView addSubview:_button];
+        
+    }
+    
     if (self.animationBounce) {
         [self animateWithBounce];
     }
@@ -392,6 +412,9 @@
             completion:^(BOOL finished) {
                 [self.contentView removeFromSuperview];
                 [self.blackOverlay removeFromSuperview];
+                if (_button != nil) {
+                    [_button removeFromSuperview];
+                }
                 [self removeFromSuperview];
                 if (self.didDismissHandler) {
                     self.didDismissHandler();
