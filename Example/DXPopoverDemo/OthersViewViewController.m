@@ -101,7 +101,7 @@
     DXPopover *popover = [DXPopover popover];
     popover.animationBounce = YES;
     [popover showAtView:sender withContentView:self.innerView inView:self.view];
-    popover.didDismissHandler = ^{
+    popover.didDismissHandler = ^(CGPoint dismissedPoint){
         self.innerView.layer.cornerRadius = 0.0;
         self.innerView.frame = _brownViewOriginRect;
         [self.outsideView addSubview:self.innerView];

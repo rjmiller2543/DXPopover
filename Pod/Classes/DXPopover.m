@@ -21,6 +21,8 @@
 @property (nonatomic) BOOL animateUp;
 @property (nonatomic, retain) UIButton *button;
 
+@property (nonatomic) CGPoint dismissedPoint;
+
 @end
 
 @implementation DXPopover {
@@ -56,6 +58,15 @@
     }
     
     return self;
+}
+
+-(UIView *)hitTest:(CGPoint)point withEvent:(UIEvent *)event
+{
+    UIView *view = [super hitTest:point withEvent:event];
+
+    _dismissedPoint = point;
+    
+    return view;
 }
 
 - (void)commonInit {
@@ -417,7 +428,7 @@
                 }
                 [self removeFromSuperview];
                 if (self.didDismissHandler) {
-                    self.didDismissHandler();
+                    self.didDismissHandler(_dismissedPoint);
                 }
             }];
     }
