@@ -17,7 +17,7 @@ typedef NS_ENUM(NSUInteger, DXPopoverMaskType) {
     DXPopoverMaskTypeNone,  // overlay does not respond to touch
 };
 
-typedef void(^DismissedBlock)(CGPoint dismissedPoint);
+typedef void(^DismissedBlock)(CGPoint dismissedPoint, UIEvent *touchEvent);
 
 @interface DXPopover : UIView
 

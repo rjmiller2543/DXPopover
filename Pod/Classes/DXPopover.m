@@ -22,6 +22,7 @@
 @property (nonatomic, retain) UIButton *button;
 
 @property (nonatomic) CGPoint dismissedPoint;
+@property (nonatomic,retain) UIEvent *dismissedEvent;
 
 @end
 
@@ -63,8 +64,13 @@
 -(UIView *)hitTest:(CGPoint)point withEvent:(UIEvent *)event
 {
     UIView *view = [super hitTest:point withEvent:event];
-
+    
+    if (view == nil) {
+        [self dismiss];
+        return view;
+    }
     _dismissedPoint = point;
+    _dismissedEvent = event;
     
     return view;
 }
@@ -117,16 +123,16 @@
     }
     
     CGRect frame = self.contentViewFrame;
-
+    
     CGFloat frameMidx = self.arrowShowPoint.x - CGRectGetWidth(frame) * 0.5;
     frame.origin.x = frameMidx;
-
+    
     // we don't need the edge now
     CGFloat sideEdge = 0.0;
     if (CGRectGetWidth(frame) < CGRectGetWidth(self.containerView.frame)) {
         sideEdge = self.sideEdge;
     }
-
+    
     // righter the edge
     CGFloat outerSideEdge = CGRectGetMaxX(frame) - CGRectGetWidth(self.containerView.bounds);
     if (outerSideEdge > 0) {
@@ -136,11 +142,11 @@
             frame.origin.x += ABS(CGRectGetMinX(frame)) + sideEdge;
         }
     }
-
+    
     self.frame = frame;
-
+    
     CGPoint arrowPoint = [self.containerView convertPoint:self.arrowShowPoint toView:self];
-
+    
     CGPoint anchorPoint;
     switch (self.popoverPosition) {
         case DXPopoverPositionDown: {
@@ -152,13 +158,13 @@
             anchorPoint = CGPointMake(arrowPoint.x / CGRectGetWidth(frame), 1);
         } break;
     }
-
+    
     CGPoint lastAnchor = self.layer.anchorPoint;
     self.layer.anchorPoint = anchorPoint;
     self.layer.position = CGPointMake(
-        self.layer.position.x + (anchorPoint.x - lastAnchor.x) * self.layer.bounds.size.width,
-        self.layer.position.y + (anchorPoint.y - lastAnchor.y) * self.layer.bounds.size.height);
-
+                                      self.layer.position.x + (anchorPoint.x - lastAnchor.x) * self.layer.bounds.size.width,
+                                      self.layer.position.y + (anchorPoint.y - lastAnchor.y) * self.layer.bounds.size.height);
+    
     frame.size.height += self.arrowSize.height;
     self.frame = frame;
     _setNeedsReset = NO;
@@ -172,7 +178,7 @@
     CGFloat contentHeight = CGRectGetHeight(contentView.bounds);
     CGFloat containerWidth = CGRectGetWidth(containerView.bounds);
     CGFloat containerHeight = CGRectGetHeight(containerView.bounds);
-
+    
     NSAssert(contentWidth > 0 && contentHeight > 0,
              @"DXPopover contentView bounds.size should not be zero");
     NSAssert(containerWidth > 0 && containerHeight > 0,
@@ -181,14 +187,14 @@
              @"DXPopover containerView width %f should be wider than contentViewWidth %f & "
              @"contentInset %@",
              containerWidth, contentWidth, NSStringFromUIEdgeInsets(self.contentInset));
-
+    
     if (!self.blackOverlay) {
         self.blackOverlay = [[UIControl alloc] init];
         self.blackOverlay.autoresizingMask =
-            UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
+        UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
     }
     self.blackOverlay.frame = containerView.bounds;
-
+    
     UIColor *maskColor;
     switch (self.maskType) {
         case DXPopoverMaskTypeBlack:
@@ -201,19 +207,19 @@
         default:
             break;
     }
-
+    
     self.blackOverlay.backgroundColor = maskColor;
-
-    [containerView addSubview:self.blackOverlay];
-    [self.blackOverlay addTarget:self
-                          action:@selector(dismiss)
-                forControlEvents:UIControlEventTouchUpInside];
-
+    
+    //[containerView addSubview:self.blackOverlay];
+    //[self.blackOverlay addTarget:self
+    //                      action:@selector(dismiss)
+    //            forControlEvents:UIControlEventTouchUpInside];
+    
     self.containerView = containerView;
     self.contentView = contentView;
     self.popoverPosition = position;
     self.arrowShowPoint = point;
-
+    
     CGRect contentFrame = [containerView convertRect:contentView.frame toView:containerView];
     BOOL isEdgeZero = UIEdgeInsetsEqualToEdgeInsets(self.contentInset, UIEdgeInsetsZero);
     // if the edgeInset is not be setted, we use need set the contentViews cornerRadius
@@ -224,7 +230,7 @@
         contentFrame.size.width += self.contentInset.left + self.contentInset.right;
         contentFrame.size.height += self.contentInset.top + self.contentInset.bottom;
     }
-
+    
     self.contentViewFrame = contentFrame;
     [self show];
 }
@@ -236,17 +242,17 @@
     CGFloat betweenArrowAndAtView = self.betweenAtViewAndArrowHeight;
     CGFloat contentViewHeight = CGRectGetHeight(contentView.bounds);
     CGRect atViewFrame = [containerView convertRect:atView.frame toView:containerView];
-
+    
     BOOL upCanContain = CGRectGetMinY(atViewFrame) >= contentViewHeight + betweenArrowAndAtView;
     BOOL downCanContain =
-        (CGRectGetHeight(containerView.bounds) -
-         (CGRectGetMaxY(atViewFrame) + betweenArrowAndAtView)) >= contentViewHeight;
+    (CGRectGetHeight(containerView.bounds) -
+     (CGRectGetMaxY(atViewFrame) + betweenArrowAndAtView)) >= contentViewHeight;
     NSAssert((upCanContain || downCanContain),
              @"DXPopover no place for the popover show, check atView frame %@ "
              @"check contentView bounds %@ and containerView's bounds %@",
              NSStringFromCGRect(atViewFrame), NSStringFromCGRect(contentView.bounds),
              NSStringFromCGRect(containerView.bounds));
-
+    
     CGPoint atPoint = CGPointMake(CGRectGetMidX(atViewFrame), 0);
     DXPopoverPosition popoverPosition;
     if (upCanContain) {
@@ -256,13 +262,13 @@
         popoverPosition = DXPopoverPositionDown;
         atPoint.y = CGRectGetMaxY(atViewFrame) + betweenArrowAndAtView;
     }
-
+    
     // if they are all yes then it shows in the bigger container
     if (upCanContain && downCanContain) {
         CGFloat upHeight = CGRectGetMinY(atViewFrame);
         CGFloat downHeight = CGRectGetHeight(containerView.bounds) - CGRectGetMaxY(atViewFrame);
         BOOL useUp = upHeight > downHeight;
-
+        
         // except you set outsider
         if (position != 0) {
             useUp = position == DXPopoverPositionUp ? YES : NO;
@@ -275,7 +281,7 @@
             atPoint.y = CGRectGetMaxY(atViewFrame) + betweenArrowAndAtView;
         }
     }
-
+    
     [self showAtPoint:atPoint popoverPostion:popoverPosition withContentView:contentView inView:containerView];
 }
 
@@ -287,58 +293,58 @@
 
 - (void)showAtView:(UIView *)atView withContentView:(UIView *)contentView {
     [self showAtView:atView
-        withContentView:contentView
-                 inView:[UIApplication sharedApplication].keyWindow.rootViewController.view];
+     withContentView:contentView
+              inView:[UIApplication sharedApplication].keyWindow.rootViewController.view];
 }
 
 - (void)show {
     _setNeedsReset = YES;
     [self setNeedsDisplay];
-
+    
     CGRect contentViewFrame = self.contentView.frame;
     CGFloat originY = 0.0;
     if (self.popoverPosition == DXPopoverPositionDown) {
         originY = self.arrowSize.height;
     }
-
+    
     contentViewFrame.origin.x = self.contentInset.left;
     contentViewFrame.origin.y = originY + self.contentInset.top;
-
+    
     self.contentView.frame = contentViewFrame;
     [self addSubview:self.contentView];
     [self.containerView addSubview:self];
-
+    
     self.transform = CGAffineTransformMakeScale(0.0, 0.0);
     if (self.animationSpring && _isiOS7) {
         [UIView animateWithDuration:self.animationIn
-            delay:0
-            usingSpringWithDamping:0.7
-            initialSpringVelocity:3
-            options:UIViewAnimationOptionCurveEaseInOut
-            animations:^{
-                self.transform = CGAffineTransformIdentity;
-            }
-            completion:^(BOOL finished) {
-                if (self.didShowHandler) {
-                    self.didShowHandler();
-                }
-            }];
+                              delay:0
+             usingSpringWithDamping:0.7
+              initialSpringVelocity:3
+                            options:UIViewAnimationOptionCurveEaseInOut
+                         animations:^{
+                             self.transform = CGAffineTransformIdentity;
+                         }
+                         completion:^(BOOL finished) {
+                             if (self.didShowHandler) {
+                                 self.didShowHandler();
+                             }
+                         }];
     } else {
         [UIView animateWithDuration:self.animationIn
-            delay:0
-            options:UIViewAnimationOptionCurveEaseInOut
-            animations:^{
-                self.transform = CGAffineTransformIdentity;
-            }
-            completion:^(BOOL finished) {
-                if (self.didShowHandler) {
-                    self.didShowHandler();
-                }
-            }];
+                              delay:0
+                            options:UIViewAnimationOptionCurveEaseInOut
+                         animations:^{
+                             self.transform = CGAffineTransformIdentity;
+                         }
+                         completion:^(BOOL finished) {
+                             if (self.didShowHandler) {
+                                 self.didShowHandler();
+                             }
+                         }];
     }
     
     if (_useDoneButton) {
-    
+        
         CGFloat buttonSize = _containerView.frame.size.width * 0.15;
         _button = [[UIButton alloc] initWithFrame:CGRectMake(_containerView.frame.origin.x, _containerView.frame.size.height - buttonSize, _containerView.frame.size.width, buttonSize)];
         [_button setTitle:@"Got it" forState:UIControlStateNormal];
@@ -412,25 +418,49 @@
     [self showAtView:atView withContentView:textLabel inView:container];
 }
 
+- (void)dismissWithCompletionHandler:(UIView *(^)(BOOL done))completion
+{
+    if (self.superview) {
+        [UIView animateWithDuration:self.animationOut
+                              delay:0.0
+                            options:UIViewAnimationOptionBeginFromCurrentState | UIViewAnimationOptionCurveEaseInOut
+                         animations:^{
+                             self.transform = CGAffineTransformMakeScale(0.0001, 0.0001);
+                         }
+                         completion:^(BOOL finished) {
+                             [self.contentView removeFromSuperview];
+                             [self.blackOverlay removeFromSuperview];
+                             if (_button != nil) {
+                                 [_button removeFromSuperview];
+                             }
+                             [self removeFromSuperview];
+                             if (self.didDismissHandler) {
+                                 self.didDismissHandler(_dismissedPoint, _dismissedEvent);
+                             }
+                             completion(nil);
+                         }];
+    }
+}
+
 - (void)dismiss {
     if (self.superview) {
         [UIView animateWithDuration:self.animationOut
-            delay:0.0
-            options:UIViewAnimationOptionBeginFromCurrentState | UIViewAnimationOptionCurveEaseInOut
-            animations:^{
-                self.transform = CGAffineTransformMakeScale(0.0001, 0.0001);
-            }
-            completion:^(BOOL finished) {
-                [self.contentView removeFromSuperview];
-                [self.blackOverlay removeFromSuperview];
-                if (_button != nil) {
-                    [_button removeFromSuperview];
-                }
-                [self removeFromSuperview];
-                if (self.didDismissHandler) {
-                    self.didDismissHandler(_dismissedPoint);
-                }
-            }];
+                              delay:0.0
+                            options:UIViewAnimationOptionBeginFromCurrentState | UIViewAnimationOptionCurveEaseInOut
+                         animations:^{
+                             self.transform = CGAffineTransformMakeScale(0.0001, 0.0001);
+                         }
+                         completion:^(BOOL finished) {
+                             [self.contentView removeFromSuperview];
+                             [self.blackOverlay removeFromSuperview];
+                             if (_button != nil) {
+                                 [_button removeFromSuperview];
+                             }
+                             [self removeFromSuperview];
+                             if (self.didDismissHandler) {
+                                 self.didDismissHandler(_dismissedPoint, _dismissedEvent);
+                             }
+                         }];
     }
 }
 
@@ -442,12 +472,12 @@
     CGSize arrowSize = self.arrowSize;
     CGFloat cornerRadius = self.cornerRadius;
     CGSize size = self.bounds.size;
-
+    
     switch (self.popoverPosition) {
         case DXPopoverPositionDown: {
             [arrow moveToPoint:CGPointMake(arrowPoint.x, 0)];
             [arrow
-                addLineToPoint:CGPointMake(arrowPoint.x + arrowSize.width * 0.5, arrowSize.height)];
+             addLineToPoint:CGPointMake(arrowPoint.x + arrowSize.width * 0.5, arrowSize.height)];
             [arrow addLineToPoint:CGPointMake(size.width - cornerRadius, arrowSize.height)];
             [arrow addArcWithCenter:CGPointMake(size.width - cornerRadius,
                                                 arrowSize.height + cornerRadius)
@@ -457,11 +487,11 @@
                           clockwise:YES];
             [arrow addLineToPoint:CGPointMake(size.width, size.height - cornerRadius)];
             [arrow
-                addArcWithCenter:CGPointMake(size.width - cornerRadius, size.height - cornerRadius)
-                          radius:cornerRadius
-                      startAngle:DEGREES_TO_RADIANS(0)
-                        endAngle:DEGREES_TO_RADIANS(90.0)
-                       clockwise:YES];
+             addArcWithCenter:CGPointMake(size.width - cornerRadius, size.height - cornerRadius)
+             radius:cornerRadius
+             startAngle:DEGREES_TO_RADIANS(0)
+             endAngle:DEGREES_TO_RADIANS(90.0)
+             clockwise:YES];
             [arrow addLineToPoint:CGPointMake(0, size.height)];
             [arrow addArcWithCenter:CGPointMake(cornerRadius, size.height - cornerRadius)
                              radius:cornerRadius
@@ -475,7 +505,7 @@
                            endAngle:DEGREES_TO_RADIANS(270)
                           clockwise:YES];
             [arrow
-                addLineToPoint:CGPointMake(arrowPoint.x - arrowSize.width * 0.5, arrowSize.height)];
+             addLineToPoint:CGPointMake(arrowPoint.x - arrowSize.width * 0.5, arrowSize.height)];
         } break;
         case DXPopoverPositionUp: {
             [arrow moveToPoint:CGPointMake(arrowPoint.x, size.height)];
